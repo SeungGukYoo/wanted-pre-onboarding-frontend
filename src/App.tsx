@@ -1,24 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Link } from "react-router-dom";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div className="flex justify-center items-center flex-col h-[100vh]">
+      <h1 className=" mb-10 text-lg">Wanted Front-end Todo List</h1>
+
+      <div className="flex  justify-center items-center">
+        <Link
+          to={"/signin"}
+          className="mr-4 bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded"
         >
-          Learn React
-        </a>
-      </header>
+          Sign In
+        </Link>
+        <Link
+          to={"/signup"}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded"
+        >
+          Sign Up
+        </Link>
+      </div>
     </div>
   );
 }
