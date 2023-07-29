@@ -1,7 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 const SignUp = () => {
+  const navigation = useNavigate();
   const [email, setEmail] = useState("");
   const [isEmailValidate, setIsEamilValidate] = useState(false);
   const [password, setPassword] = useState("");
@@ -25,7 +27,27 @@ const SignUp = () => {
   };
   const handleSignUp = async (e: any) => {
     e.preventDefault();
-    console.log(email, password);
+    if (!enableButton) return;
+    await axios({
+      url: "https://www.pre-onboarding-selection-task.shop/auth/signup",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: {
+        email,
+        password,
+      },
+    })
+      .then((result) => {
+        if (result.status === 201) {
+          alert('회원가입이 완료되었습니다')
+          navigation("/signin");
+          setEmail("");
+          setPassword("");
+        }
+      })
+      .catch((err) => alert(err.response.data.message));
   };
   useEffect(() => {
     if (!isEmailValidate || !isPasswordValidate) {
