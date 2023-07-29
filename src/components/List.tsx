@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import Todo from "./Todo";
 
-interface TodoType {
+export interface TodoType {
   id: number;
   todo: string;
   isCompleted: boolean;
@@ -42,14 +42,42 @@ const List = () => {
       })
       .catch((err) => console.log(err.response));
   };
-  useEffect(() => {
-    if (!localStorage.getItem("jwt_token")) navigation("/");
-  }, [navigation]);
+
+  const getTodo = useCallback(async () => {
+    await axios({
+      url: `https://www.pre-onboarding-selection-task.shop/todos`,
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
+      },
+    })
+      .then((result) => setTodos([...result.data]))
+      .catch((err) => console.log(err.response.data));
+  }, []);
+  //수정 미구현
+  const modifyTodo = async (value: TodoType) => {
+    console.log(value);
+    await axios({
+      url: `https://www.pre-onboarding-selection-task.shop/todos/${value.id}`,
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("jwt_token")}`,
+        "Content-Type": "application/json",
+      },
+      data: {
+        todo: value.todo,
+        isCompleted: value.isCompleted,
+      },
+    })
+      .then((result) => console.log(result))
+      .catch((err) => console.log(err.response.data));
+  };
 
   useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }, [todos]);
-  console.log(todos);
+    if (!localStorage.getItem("jwt_token")) navigation("/");
+    getTodo();
+  }, [getTodo, navigation]);
+
   return (
     <div className="max-w-[1024px] mx-auto flex flex-col justify-center items-center">
       <button
@@ -78,7 +106,7 @@ const List = () => {
       </div>
       <ul className="">
         {todos.map((todo) => (
-          <Todo key={todo.id} data={todo} />
+          <Todo key={todo.id} data={todo} modifyTodo={modifyTodo} />
         ))}
       </ul>
     </div>
