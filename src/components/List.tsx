@@ -54,12 +54,23 @@ const List = () => {
       .then((result) => setTodos([...result.data]))
       .catch((err) => console.log(err.response.data));
   }, []);
+
+  const deleteTodo = useCallback(async (id: number) => {
+    await axios({
+      url: `https://www.pre-onboarding-selection-task.shop/todos/${id}`,
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
+      },
+    }).then((res) => setTodos((pre) => pre.filter((el) => el.id !== id)));
+  }, []);
+
   //수정 미구현
   const modifyTodo = async (value: TodoType) => {
     console.log(value);
     await axios({
       url: `https://www.pre-onboarding-selection-task.shop/todos/${value.id}`,
-      method: "POST",
+      method: "PUT",
       headers: {
         "Authorization": `Bearer ${localStorage.getItem("jwt_token")}`,
         "Content-Type": "application/json",
@@ -106,7 +117,7 @@ const List = () => {
       </div>
       <ul className="">
         {todos.map((todo) => (
-          <Todo key={todo.id} data={todo} modifyTodo={modifyTodo} />
+          <Todo key={todo.id} data={todo} modifyTodo={modifyTodo} deleteTodo={deleteTodo} />
         ))}
       </ul>
     </div>

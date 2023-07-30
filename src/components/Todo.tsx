@@ -4,11 +4,16 @@ import { TodoType } from "./List";
 interface Prop {
   data: { id: number; todo: string; isCompleted: boolean; userId: number };
   modifyTodo: (value: TodoType) => void;
+  deleteTodo: (id: number) => void;
 }
 
-const Todo = ({ data, modifyTodo }: Prop) => {
+const Todo = ({ data, modifyTodo, deleteTodo }: Prop) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isModify, setIsModify] = useState(false);
+  const deleteData = (e: React.FormEvent) => {
+    e.preventDefault();
+    deleteTodo(data.id);
+  };
   const modifyData = (e: React.FormEvent) => {
     e.preventDefault();
     console.log(inputRef.current?.value);
@@ -50,7 +55,12 @@ const Todo = ({ data, modifyTodo }: Prop) => {
         </button>
       )}
 
-      <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l">삭제</button>
+      <button
+        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
+        onClick={deleteData}
+      >
+        삭제
+      </button>
     </li>
   );
 };
