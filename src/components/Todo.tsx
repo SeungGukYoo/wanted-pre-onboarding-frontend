@@ -27,8 +27,7 @@ const Todo = ({ data }: Prop) => {
   const updateTodo = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-
-      if (checkRef.current && textRef.current) {
+      if (checkRef.current && textRef.current && isModify) {
         await UpdateTodo({
           id: data.id,
           todo: textRef.current?.value,
@@ -42,11 +41,31 @@ const Todo = ({ data }: Prop) => {
         });
       }
     },
-    [context, data.id]
+    [context, data.id, isModify]
   );
+
+  const checkBoxUpdate = useCallback(async () => {
+    if (checkRef.current && !isModify) {
+      await UpdateTodo({
+        ...data,
+        isCompleted: checkRef.current?.checked,
+      }).then((result) => {
+        context?.dispatch({
+          type: "UPDATE",
+          payload: result,
+        });
+      });
+    }
+  }, [context, data, isModify]);
   return (
     <li className="flex my-4 py-2 border-y-2 border-gray-700/30">
-      <input className="mr-4" type="checkbox" defaultChecked={data.isCompleted} ref={checkRef} />
+      <input
+        className="mr-4"
+        type="checkbox"
+        defaultChecked={data.isCompleted}
+        ref={checkRef}
+        onChange={checkBoxUpdate}
+      />
       {isModify ? (
         <input
           className="text-[24px] mr-4 min-w-[250px] line-clamp-1"
@@ -74,12 +93,21 @@ const Todo = ({ data }: Prop) => {
         </button>
       )}
 
-      <button
-        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
-        onClick={deleteTodo}
-      >
-        삭제
-      </button>
+      {isModify ? (
+        <button
+          className="mr-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
+          onClick={() => setIsModify(false)}
+        >
+          취소
+        </button>
+      ) : (
+        <button
+          className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
+          onClick={deleteTodo}
+        >
+          삭제
+        </button>
+      )}
     </li>
   );
 };
