@@ -1,39 +1,58 @@
-import React, { useRef, useState } from "react";
-import { TodoType } from "./List";
+import React, { useCallback, useRef, useState } from "react";
+import { GlobalState } from "../context/TodoProvider";
+import { DeleteTodo, UpdateTodo } from "../util/TodoUtil";
 
 interface Prop {
   data: { id: number; todo: string; isCompleted: boolean; userId: number };
-  modifyTodo: (value: TodoType) => void;
-  deleteTodo: (id: number) => void;
 }
 
-const Todo = ({ data, modifyTodo, deleteTodo }: Prop) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+const Todo = ({ data }: Prop) => {
+  const context = GlobalState();
+  const textRef = useRef<HTMLInputElement>(null);
+  const checkRef = useRef<HTMLInputElement>(null);
   const [isModify, setIsModify] = useState(false);
-  const deleteData = (e: React.FormEvent) => {
-    e.preventDefault();
-    deleteTodo(data.id);
-  };
-  const modifyData = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(inputRef.current?.value);
-    if (inputRef.current) {
-      const updateTodo = {
-        ...data,
-        todo: inputRef.current?.value,
-      };
-      modifyTodo(updateTodo);
-    }
-  };
+
+  const deleteTodo = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      await DeleteTodo(data.id).then((_) => {
+        context?.dispatch({
+          type: "DELETE",
+          payload: data.id,
+        });
+      });
+    },
+    [context, data.id]
+  );
+  const updateTodo = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (checkRef.current && textRef.current) {
+        await UpdateTodo({
+          id: data.id,
+          todo: textRef.current?.value,
+          isCompleted: checkRef.current?.checked,
+        }).then((result) => {
+          context?.dispatch({
+            type: "UPDATE",
+            payload: result,
+          });
+          setIsModify(false);
+        });
+      }
+    },
+    [context, data.id]
+  );
   return (
-    <li className="flex my-4 py-2 border-y-2 border-gray-700/30 ">
-      <input className="mr-4" type="checkbox" name="" id="" defaultChecked={data.isCompleted} />
+    <li className="flex my-4 py-2 border-y-2 border-gray-700/30">
+      <input className="mr-4" type="checkbox" defaultChecked={data.isCompleted} ref={checkRef} />
       {isModify ? (
         <input
           className="text-[24px] mr-4 min-w-[250px] line-clamp-1"
           type="text"
           defaultValue={data.todo}
-          ref={inputRef}
+          ref={textRef}
         ></input>
       ) : (
         <p className="text-[24px] mr-4 min-w-[250px] line-clamp-1">{data.todo}</p>
@@ -42,7 +61,7 @@ const Todo = ({ data, modifyTodo, deleteTodo }: Prop) => {
       {isModify ? (
         <button
           className="mr-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
-          onClick={modifyData}
+          onClick={updateTodo}
         >
           완료
         </button>
@@ -57,7 +76,7 @@ const Todo = ({ data, modifyTodo, deleteTodo }: Prop) => {
 
       <button
         className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
-        onClick={deleteData}
+        onClick={deleteTodo}
       >
         삭제
       </button>
