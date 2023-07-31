@@ -46,7 +46,7 @@ export const DeleteTodo = async (id: number) => {
   }
 };
 
-export const UpdateTodo = async (value: { id: number; todo: string; isCompleted: boolean; userId: number }) => {
+export const UpdateTodo = async (value: { id: number; todo: string; isCompleted: boolean }) => {
   try {
     const result = await axios({
       url: `https://www.pre-onboarding-selection-task.shop/todos/${value.id}`,
@@ -60,7 +60,7 @@ export const UpdateTodo = async (value: { id: number; todo: string; isCompleted:
         isCompleted: value.isCompleted,
       },
     });
-    return result;
+    return result.data;
   } catch (err) {
     console.log(err);
   }
