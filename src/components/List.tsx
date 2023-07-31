@@ -1,8 +1,8 @@
-import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-import { DeleteTodo, GetTodo, PostTodo, UpdateTodo } from "../util/TodoUtil";
+import { GlobalState } from "../context/TodoProvider";
+import { PostTodo } from "../util/TodoUtil";
 import Todo from "./Todo";
 
 export interface TodoType {
@@ -15,10 +15,8 @@ export interface TodoType {
 const List = () => {
   const navigation = useNavigate();
   const [todo, setTodo] = useState("");
-  const [todos, setTodos] = useState<TodoType[] | []>(() => {
-    const localStorageTodos = localStorage.getItem("todos");
-    return localStorageTodos ? JSON.parse(localStorageTodos) : [];
-  });
+
+  const context = GlobalState();
 
   const signOut = useCallback(() => {
     localStorage.removeItem("jwt_token");
@@ -29,37 +27,21 @@ const List = () => {
   const addTodo = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       e.preventDefault();
-      await PostTodo(todo)
-        .then((result) => {
-          setTodos(() => [...todos, result]);
-          setTodo("");
-        })
-        .catch((err) => console.log(err.response.data));
+
+      await PostTodo(todo).then((result) => {
+        context?.dispatch({
+          type: "ADD",
+          payload: result,
+        });
+        setTodo("");
+      });
     },
-    [todo, todos]
+    [context, todo]
   );
-
-  const getTodo = useCallback(async () => {
-    await GetTodo()
-      .then((result) => setTodos([...result]))
-      .catch((err) => console.log(err.response.data));
-  }, []);
-
-  const deleteTodo = useCallback(async (id: number) => {
-    await DeleteTodo(id).then((_) => setTodos((pre) => pre.filter((el) => el.id !== id)));
-  }, []);
-
-  //수정 미구현
-  const modifyTodo = useCallback(async (value: TodoType) => {
-    await UpdateTodo(value)
-      .then((result) => console.log(result))
-      .catch((err) => console.log(err.response.data));
-  }, []);
 
   useEffect(() => {
     if (!localStorage.getItem("jwt_token")) navigation("/");
-    getTodo();
-  }, [getTodo, navigation]);
+  }, [navigation]);
 
   return (
     <div className="max-w-[1024px] mx-auto flex flex-col justify-center items-center">
@@ -88,8 +70,8 @@ const List = () => {
         </button>
       </div>
       <ul className="">
-        {todos.map((todo) => (
-          <Todo key={todo.id} data={todo} modifyTodo={modifyTodo} deleteTodo={deleteTodo} />
+        {context?.state.todos.map((todo) => (
+          <Todo key={todo.id} data={todo} />
         ))}
       </ul>
     </div>
