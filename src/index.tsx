@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Link, Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import List from "./components/List";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
+import { GlobalStateProvider } from "./context/TodoProvider";
 import "./index.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
@@ -29,6 +30,8 @@ const router = createBrowserRouter([
 
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <GlobalStateProvider>
+      <RouterProvider router={router} />
+    </GlobalStateProvider>
   </React.StrictMode>
 );
