@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+
+import { DeleteTodo, GetTodo, PostTodo, UpdateTodo } from "../util/TodoUtil";
 import Todo from "./Todo";
 
 export interface TodoType {
@@ -17,72 +19,42 @@ const List = () => {
     const localStorageTodos = localStorage.getItem("todos");
     return localStorageTodos ? JSON.parse(localStorageTodos) : [];
   });
+
   const signOut = useCallback(() => {
     localStorage.removeItem("jwt_token");
     localStorage.removeItem("todos");
     navigation("/");
   }, [navigation]);
 
-  const addTodo = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.preventDefault();
-    await axios({
-      url: "https://www.pre-onboarding-selection-task.shop/todos",
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${localStorage.getItem("jwt_token")}`,
-        "Content-Type": "application/json",
-      },
-      data: {
-        todo,
-      },
-    })
-      .then((result) => {
-        setTodos(() => [...todos, result.data]);
-        setTodo("");
-      })
-      .catch((err) => console.log(err.response));
-  };
+  const addTodo = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.preventDefault();
+      await PostTodo(todo)
+        .then((result) => {
+          setTodos(() => [...todos, result]);
+          setTodo("");
+        })
+        .catch((err) => console.log(err.response.data));
+    },
+    [todo, todos]
+  );
 
   const getTodo = useCallback(async () => {
-    await axios({
-      url: `https://www.pre-onboarding-selection-task.shop/todos`,
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
-      },
-    })
-      .then((result) => setTodos([...result.data]))
+    await GetTodo()
+      .then((result) => setTodos([...result]))
       .catch((err) => console.log(err.response.data));
   }, []);
 
   const deleteTodo = useCallback(async (id: number) => {
-    await axios({
-      url: `https://www.pre-onboarding-selection-task.shop/todos/${id}`,
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
-      },
-    }).then((res) => setTodos((pre) => pre.filter((el) => el.id !== id)));
+    await DeleteTodo(id).then((_) => setTodos((pre) => pre.filter((el) => el.id !== id)));
   }, []);
 
   //수정 미구현
-  const modifyTodo = async (value: TodoType) => {
-    console.log(value);
-    await axios({
-      url: `https://www.pre-onboarding-selection-task.shop/todos/${value.id}`,
-      method: "PUT",
-      headers: {
-        "Authorization": `Bearer ${localStorage.getItem("jwt_token")}`,
-        "Content-Type": "application/json",
-      },
-      data: {
-        todo: value.todo,
-        isCompleted: value.isCompleted,
-      },
-    })
+  const modifyTodo = useCallback(async (value: TodoType) => {
+    await UpdateTodo(value)
       .then((result) => console.log(result))
       .catch((err) => console.log(err.response.data));
-  };
+  }, []);
 
   useEffect(() => {
     if (!localStorage.getItem("jwt_token")) navigation("/");
