@@ -1,46 +1,66 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
+import axios from "axios";
 import { GlobalState } from "../context/TodoProvider";
-import { PostTodo } from "../util/TodoUtil";
+import { GetTodo, PostTodo } from "../util/TodoUtil";
 import Todo from "./Todo";
-
-export interface TodoType {
-  id: number;
-  todo: string;
-  isCompleted: boolean;
-  userId: number;
-}
 
 const List = () => {
   const navigation = useNavigate();
   const [todo, setTodo] = useState("");
-
   const context = GlobalState();
-
   const signOut = useCallback(() => {
     localStorage.removeItem("jwt_token");
-    localStorage.removeItem("todos");
     navigation("/");
   }, [navigation]);
 
   const addTodo = useCallback(
-    async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    async (e: React.MouseEvent) => {
       e.preventDefault();
-
-      await PostTodo(todo).then((result) => {
-        context?.dispatch({
-          type: "ADD",
-          payload: result,
-        });
+      if (!todo.trim()) {
+        alert("옳바르지 않은 값을 입력하셨습니다.");
         setTodo("");
-      });
+        return;
+      }
+      try {
+        await PostTodo(todo).then((result) => {
+          context?.dispatch({
+            type: "ADD",
+            payload: result,
+          });
+          setTodo("");
+        });
+      } catch (err) {
+        if (axios.isAxiosError(err) && err.response?.data) {
+          alert(err.response?.data.message);
+        } else {
+          console.error(err);
+        }
+      }
     },
     [context, todo]
   );
 
   useEffect(() => {
-    if (!localStorage.getItem("jwt_token")) navigation("/");
+    if (!localStorage.getItem("jwt_token")) {
+      alert("로그인을 하지않았습니다.");
+      navigation("/signin");
+      return;
+    }
+    const fetchInitialState = async () => {
+      try {
+        const result = await GetTodo();
+        context?.dispatch({ type: "GET", payload: result });
+      } catch (err) {
+        if (axios.isAxiosError(err) && err.response?.data) {
+          alert(err.response.data.message);
+        } else {
+          console.error(err);
+        }
+      }
+    };
+    fetchInitialState();
   }, [navigation]);
 
   return (
