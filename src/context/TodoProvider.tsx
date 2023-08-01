@@ -1,16 +1,5 @@
-import React, { createContext, useContext, useEffect, useReducer } from "react";
-import { GetTodo } from "../util/TodoUtil";
-
-interface Todo {
-  id: number;
-  todo: string;
-  isCompleted: boolean;
-  userId: number;
-}
-
-interface State {
-  todos: Todo[];
-}
+import React, { createContext, useContext, useReducer } from "react";
+import type { State, Todo } from "../..";
 
 type Action =
   | { type: "ADD"; payload: Todo }
@@ -62,14 +51,6 @@ export const GlobalState = () => {
 
 export const GlobalStateProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  useEffect(() => {
-    const fetchInitialState = async () => {
-      const result = await GetTodo();
-      dispatch({ type: "GET", payload: result });
-    };
-
-    fetchInitialState();
-  }, []);
 
   return <GlobalStateContext.Provider value={{ state, dispatch }}>{children}</GlobalStateContext.Provider>;
 };
