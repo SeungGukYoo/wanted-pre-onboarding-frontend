@@ -15,23 +15,21 @@ const router = createBrowserRouter([
     element: <App />,
   },
   {
-    path: "signin",
+    path: "/signin",
     element: <SignIn />,
   },
   {
-    path: "signup",
+    path: "/signup",
     element: <SignUp />,
   },
   {
-    path: "todo",
+    path: "/todo",
     element: <List />,
   },
 ]);
 
 root.render(
-  <React.StrictMode>
-    <GlobalStateProvider>
-      <RouterProvider router={router} />
-    </GlobalStateProvider>
-  </React.StrictMode>
+  <GlobalStateProvider>
+    <RouterProvider router={router} />
+  </GlobalStateProvider>
 );
