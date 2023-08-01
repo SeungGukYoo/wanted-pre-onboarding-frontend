@@ -35,7 +35,7 @@ $ npm start
 
 ## 🚀 배포 주소
 
-- [Vercel 바로가기](wanted-pre-onboarding-frontend-5femfg9kp-seunggukyoo.vercel.app)
+- [Vercel 바로가기](https://wanted-pre-onboarding-frontend-topaz-theta.vercel.app/)
 
 ## 📌 프로젝트 설명
 
