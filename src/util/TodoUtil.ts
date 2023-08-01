@@ -16,7 +16,7 @@ export const PostTodo = async (todo: string) => {
 
     return result.data;
   } catch (err) {
-    return err;
+    throw err;
   }
 };
 
@@ -30,7 +30,9 @@ export const GetTodo = async () => {
       },
     });
     return result.data;
-  } catch (err) {}
+  } catch (err) {
+    throw err;
+  }
 };
 export const DeleteTodo = async (id: number) => {
   try {
@@ -42,7 +44,7 @@ export const DeleteTodo = async (id: number) => {
       },
     });
   } catch (err) {
-    console.log(err);
+    throw err;
   }
 };
 
@@ -62,6 +64,6 @@ export const UpdateTodo = async (value: { id: number; todo: string; isCompleted:
     });
     return result.data;
   } catch (err) {
-    console.log(err);
+    throw err;
   }
 };
