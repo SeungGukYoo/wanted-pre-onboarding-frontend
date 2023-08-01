@@ -1,61 +1,38 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router";
+import Vaildate from "../custom/Vaildate";
+import { SignUpHandle } from "../util/UserUtil";
 
 const SignUp = () => {
   const navigation = useNavigate();
-  const [email, setEmail] = useState("");
-  const [isEmailValidate, setIsEamilValidate] = useState(false);
-  const [password, setPassword] = useState("");
-  const [isPasswordValidate, setIsPasswordValidate] = useState(false);
-  const [enableButton, setEnableButton] = useState(false);
+  const { email, setEmail, password, setPassword, enableButton, handleEmailChange, handlePasswordChange } = Vaildate();
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!/@/.test(e.target.value)) {
-      setIsEamilValidate(false);
-      return;
-    }
-    setIsEamilValidate(true);
-    setEmail(e.target.value);
-  };
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value.length < 7) {
-      setIsPasswordValidate(false);
-    }
-    setIsPasswordValidate(true);
-    setPassword(e.target.value);
-  };
-  const handleSignUp = async (e: any) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!enableButton) return;
-    await axios({
-      url: "https://www.pre-onboarding-selection-task.shop/auth/signup",
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: {
-        email,
-        password,
-      },
-    })
-      .then((result) => {
-        if (result.status === 201) {
-          alert('회원가입이 완료되었습니다')
+    try {
+      await SignUpHandle(email, password).then((result) => {
+        if (result?.status === 201) {
+          alert("회원가입이 완료되었습니다");
           navigation("/signin");
           setEmail("");
           setPassword("");
         }
-      })
-      .catch((err) => alert(err.response.data.message));
-  };
-  useEffect(() => {
-    if (!isEmailValidate || !isPasswordValidate) {
-      setEnableButton(false);
-      return;
+      });
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response && err.response.status === 400) {
+        alert(err.response.data.message);
+      } else {
+        console.error(err);
+      }
     }
-    setEnableButton(true);
-  }, [isEmailValidate, isPasswordValidate]);
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem("jwt_token")) navigation("/todo");
+  }, [navigation]);
+
   return (
     <div className="bg-[#EDF2F7] h-[100vh]  flex justify-center items-center">
       <form className="min-w-[520px] bg-white shadow-md rounded px-8 pt-8 pb-8 mb-4" onSubmit={handleSignUp}>
@@ -69,7 +46,7 @@ const SignUp = () => {
               name="email"
               type="text"
               data-testid="email-input"
-              onChange={handleEmailChange}
+              onChange={(e) => handleEmailChange(e)}
             />
           </div>
         </div>
@@ -84,7 +61,7 @@ const SignUp = () => {
               name="password"
               data-testid="password-input"
               placeholder="******************"
-              onChange={handlePasswordChange}
+              onChange={(e) => handlePasswordChange(e)}
             />
           </div>
         </div>
@@ -96,6 +73,7 @@ const SignUp = () => {
               ${enableButton ? " hover:bg-blue-700" : "opacity-50 cursor-not-allowed"}`}
               type="submit"
               data-testid="signup-button"
+              disabled={enableButton ? false : true}
             >
               Sign Up
             </button>
