@@ -46,6 +46,7 @@ const SignUp = () => {
               name="email"
               type="text"
               data-testid="email-input"
+              placeholder="example@eamil.com"
               onChange={(e) => handleEmailChange(e)}
             />
           </div>
