@@ -1,6 +1,11 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function App() {
+  const navigation = useNavigate();
+  useEffect(() => {
+    if (localStorage.getItem("jwt_token")) navigation("/todo");
+  }, [navigation]);
   return (
     <div className="flex justify-center items-center flex-col h-[100vh]">
       <h1 className=" mb-10 text-lg">Wanted Front-end Todo List</h1>
